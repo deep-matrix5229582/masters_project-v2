@@ -79,7 +79,7 @@ def predict_drug(Age,
     y_predict = model.predict([[Age, Sex, BP, Cholesterol, Na_to_K]])[0]
 
     # 4. Return the "raw" version of the prediction i.e. the actual name of the drug rather than the numerical encoded version
-    return drug_map[y_predict] 
+    return drug_map[y_predict]
 #predict_drug(47, "F", "LOW",  "HIGH", 14)
 
 #predict_drug(60, "F", "LOW",  "HIGH", 20)
@@ -118,7 +118,7 @@ prescribe_output = Output()
 # Button click event handlers ...
 def prescribe_button_on_click(b):
     
-    request_url = f"https://graham-harrison68-web03.azurewebsites.net/drug?Age={age_text.value}&Sex={gender_dropdown.value}&BP={bp_dropdown.value}&Cholesterol={cholesterol_dropdown.value}&Na_to_K={na_to_k_text.value}"
+    request_url = f"https://drugpred.azurewebsites.net/"
     response = requests.get(request_url)
     recommended_drug = response.json()["recommended_drug"]
 
@@ -133,5 +133,3 @@ vbox_prescribe = VBox([prescribe_label, age_text, gender_dropdown, bp_dropdown, 
 
 vbox_prescribe
 
-if __name__ == "__main__":
-    app.run()
