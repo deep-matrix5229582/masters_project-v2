@@ -1,17 +1,17 @@
-import azureml.core
-from azureml.core import Workspace
-from azureml.core import Model
-from azureml.core.resource_configuration import ResourceConfiguration
+#import azureml.core
+#from azureml.core import Workspace
+#from azureml.core import Model
+#from azureml.core.resource_configuration import ResourceConfiguration
 import json
-from azureml.core import Environment
-from azureml.core import Experiment
-from azureml.core.webservice import Webservice
-from azureml.core.conda_dependencies import CondaDependencies
+#from azureml.core import Environment
+#from azureml.core import Experiment
+#from azureml.core.webservice import Webservice
+#from azureml.core.conda_dependencies import CondaDependencies
 #from sklearn.datasets import load_diabetes
-from azureml.core.image import ContainerImage
+#from azureml.core.image import ContainerImage
 #from sklearn.linear_model import Ridge
-from azureml.core.model import InferenceConfig
-from azureml.core.webservice import AciWebservice
+#from azureml.core.model import InferenceConfig
+#from azureml.core.webservice import AciWebservice
 
 from flask import Flask
 
@@ -26,10 +26,10 @@ from sklearn.model_selection import cross_val_score
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.preprocessing import LabelEncoder
 
-ws = Workspace.from_config()
-exp = Experiment(workspace = ws, name = 'Drug_pred')
-run = exp.start_logging()
-run.log("Starting time", str(datetime.datetime.now()))
+#ws = Workspace.from_config()
+#exp = Experiment(workspace = ws, name = 'Drug_pred')
+#run = exp.start_logging()
+#run.log("Starting time", str(datetime.datetime.now()))
 
 dataframe_1 = pan.read_csv('https://raw.githubusercontent.com/deep-matrix5229582/masters_project-v2/caf5893f93bbaf0ee4af01131988bef72c31f173/drug200.csv')
 dataframe_1.head()
@@ -51,8 +51,10 @@ val_res = cross_val_score(ml_mod, var_1, var_2, cv=k_f, scoring = "accuracy")
 pickle.dump(ml_mod, pickle_file)                     
 pickle_file.close()"""
 
-filename = 'outputs/drug_mod.pkl'
+filename = 'drug_mod.pkl'
 joblib.dump(ml_mod, filename)
+
+
 app = Flask(__name__)
 
 gender_map = {"F": 0, "M": 1}
@@ -68,7 +70,7 @@ def predict_drug(Age,
 
     # 1. Read the machine learning model from its saved state ...
     #pickle_file = open('outputs/drug_mod.pkl', 'rb')     
-    model = joblib.load('outputs/drug_mod.pkl')
+    model = joblib.load('drug_mod.pkl')
     
     # 2. Transform the "raw data" passed into the function to the encoded / numerical values using the maps / dictionaries
     Sex = gender_map[Sex]
@@ -79,10 +81,12 @@ def predict_drug(Age,
     y_predict = model.predict([[Age, Sex, BP, Cholesterol, Na_to_K]])[0]
 
     # 4. Return the "raw" version of the prediction i.e. the actual name of the drug rather than the numerical encoded version
-    return drug_map[y_predict]
+    return drug_map[y_predict] 
 #predict_drug(47, "F", "LOW",  "HIGH", 14)
 
 #predict_drug(60, "F", "LOW",  "HIGH", 20)
+
+
 @app.route("/")
 def hello():
     return "A test web service for accessing a machine learning model to make drug recommendations v2."
@@ -101,35 +105,3 @@ def api_all():
 
     #return(jsonify(drug))
     return(jsonify(recommended_drug = drug))
-
-
-import requests
-from ipywidgets import Label, BoundedFloatText, BoundedIntText, Dropdown, Button, Output, VBox
-
-prescribe_label = Label('Drug prescription prediction for age, gender, bp, cholesterol and "Na to K"')
-age_text = BoundedIntText(min=16, max=100, value=47, description="Age:", disabled=False)
-gender_dropdown = Dropdown(options=['F', 'M'], description='Gender:', disabled=False)
-bp_dropdown = Dropdown(options=['HIGH', 'LOW', 'NORMAL'], value="LOW", description='BP:', disabled=False)
-cholesterol_dropdown = Dropdown(options=['HIGH', 'NORMAL'], description='Cholesterol:', disabled=False)
-na_to_k_text = BoundedFloatText(min=0.0, max=50.0, value=14, description="Na to K", disabled=False)
-prescribe_button = Button(description="Presribe")
-prescribe_output = Output()
-
-# Button click event handlers ...
-def prescribe_button_on_click(b):
-    
-    request_url = f"https://drugpred.azurewebsites.net/"
-    response = requests.get(request_url)
-    recommended_drug = response.json()["recommended_drug"]
-
-    prescribe_output.clear_output()
-    with prescribe_output:
-
-        print(f"The recommended drug is {recommended_drug}")
-        
-prescribe_button.on_click(prescribe_button_on_click)
-
-vbox_prescribe = VBox([prescribe_label, age_text, gender_dropdown, bp_dropdown, cholesterol_dropdown, na_to_k_text, prescribe_button, prescribe_output])
-
-vbox_prescribe
-
